@@ -1,0 +1,71 @@
+#!/bin/bash
+
+BASEDIR=$(dirname $(dirname $(readlink -f $0)))
+# echo $BASEDIR
+
+QUIET=''
+if [ "$1" == "-q" ]
+then
+  QUIET='-q'
+  shift
+fi
+
+if [ "$*" = "" ]
+then
+  echo `basename $0`: no input file. 1>&2
+  exit 1
+fi
+
+FILE=$(dirname $1)/$(basename $1 ".curry")
+if [ ! -f $FILE.curry ]
+then
+  echo `basename $0`: \"$FILE.curry\" not found. 1>&2
+  exit 1
+fi
+
+parsecurry --flat $QUIET $FILE
+if [ $? -ne 0 ]
+then
+  echo `basename $0`: error parsing \"$FILE.curry\". 1>&2
+  exit 1
+fi
+
+# ------------------------------------------------------------------
+# create ICurry
+
+CURRYPATH=$(dirname $1):$BASEDIR/icurry:$BASEDIR/poly:$PAKCSHOME/lib:$PAKCSHOME/lib/meta
+export CURRYPATH
+
+TARGET=$(dirname $1)/.curry/$(basename $1 ".curry")
+
+# echo TARGET $TARGET
+
+if [ -f $TARGET.read -a $TARGET.read -nt $FILE.curry ]
+then
+  if [ -z "$QUIET" ]
+  then
+    echo \"read\" up to date
+  fi
+else
+  rm -f $FILE.read 
+  # command="pakcs -Dkeepfiles=yes :set v3 :set args $FILE :load $BASEDIR/icurry/Main.curry :eval main :quit"
+  command="pakcs $QUIET :set args $FILE :load $BASEDIR/icurry/Main.curry :eval Main.main :quit"
+
+  if [ -n "$QUIET" ]
+  then
+    $command > /dev/null
+  else
+    echo CURRYPATH $CURRYPATH
+    echo Running $command
+    $command
+  fi
+
+  if [ -f $FILE.read ]
+  then
+    mv -f $FILE.icur $TARGET.icur
+    mv -f $FILE.read $TARGET.read
+  else
+    echo `basename $0`: failed to create \"$FILE.read\". 1>&2
+    exit 1
+  fi
+fi
