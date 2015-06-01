@@ -33,7 +33,8 @@ fi
 # ------------------------------------------------------------------
 # create ICurry
 
-CURRYPATH=$(dirname $1):$BASEDIR/icurry:$BASEDIR/poly:$PAKCSHOME/lib:$PAKCSHOME/lib/meta
+# CURRYPATH=$(dirname $1):$BASEDIR/icurry:$BASEDIR/poly:$PAKCSHOME/lib:$PAKCSHOME/lib/meta
+CURRYPATH=$(dirname $1):$BASEDIR/icurry:$BASEDIR/poly
 export CURRYPATH
 
 TARGET=$(dirname $1)/.curry/$(basename $1 ".curry")
@@ -42,23 +43,15 @@ TARGET=$(dirname $1)/.curry/$(basename $1 ".curry")
 
 if [ -f $TARGET.read -a $TARGET.read -nt $FILE.curry ]
 then
-  if [ -z "$QUIET" ]
-  then
-    echo \"read\" up to date
-  fi
+    [ -n "$QUIET" ] || echo \"read\" up to date
 else
   rm -f $FILE.read 
   # command="pakcs -Dkeepfiles=yes :set v3 :set args $FILE :load $BASEDIR/icurry/Main.curry :eval main :quit"
-  command="pakcs $QUIET :set args $FILE :load $BASEDIR/icurry/Main.curry :eval Main.main :quit"
 
-  if [ -n "$QUIET" ]
-  then
-    $command > /dev/null
-  else
-    echo CURRYPATH $CURRYPATH
-    echo Running $command
-    $command
-  fi
+  command="pakcs $QUIET :set args $FILE :load $BASEDIR/icurry/Main.curry :eval Main.main :quit"
+  [ -n "$QUIET" ] || echo CURRYPATH $CURRYPATH
+  [ -n "$QUIET" ] || echo Running $command
+  $command
 
   if [ -f $FILE.read ]
   then

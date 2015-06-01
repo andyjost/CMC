@@ -1,0 +1,72 @@
+#!/bin/bash
+
+BASEDIR=$(dirname $(dirname $(readlink -f $0)))
+# echo $BASEDIR
+
+QUIET=''
+if [ "$1" = "-q" ]
+then
+  QUIET='-q'
+  shift
+fi
+
+if [ "$*" = "" ]
+then
+  echo `basename $0`: no input file. 1>&2
+  exit 1
+fi
+
+FILENAME=$(basename $1 ".curry")
+FILE=$(dirname $1)/$FILENAME
+if [ ! -f $FILE.curry ]
+then
+  echo `basename $0`: \"$FILENAME.curry\" not found. 1>&2
+  exit 1
+fi
+
+# ------------------------------------------------------------------
+# create ICurry
+
+TARGET=$(dirname $1)/.curry/$(basename $1 ".curry")
+
+# echo TARGET $TARGET
+
+if [ -f $TARGET.icur -a $TARGET.icur -nt $FILE.curry ]
+then
+  [ -n "$QUIET" ] || echo \"$FILENAME.icur\" up to date
+else
+  rm -f $TARGET.*
+  command="$BASEDIR/bin/curry2icur $QUIET $FILE"
+  [ -n "$QUIET" ] || echo $command
+  $command
+  if [ -f $TARGET.icur ]
+  then [ -n "$QUIET" ] || echo \"$FILENAME.icur\" created
+  else
+    echo `basename $0`: failed to create \"$FILENAME.icur\". 1>&2
+    exit 1
+  fi
+fi
+
+# ------------------------------------------------------------------
+# create C++
+
+CURRYPATH=$(dirname $1):$BASEDIR/icurry:$BASEDIR/poly:$BASEDIR/backtrack:$BASEDIR/format:$BASEDIR/flat:$PAKCSHOME/lib:$PAKCSHOME/lib/meta
+export CURRYPATH
+[ -n "$QUIET" ] || echo CURRYPATH $CURRYPATH    
+
+rm -f $TARGET.*pp
+
+command="pakcs -q :set args $TARGET :load $BASEDIR/backtrack/Main.curry :eval Main.main :quit"
+[ -n "$QUIET" ] || echo $command
+$command
+
+if [ -f $TARGET.cpp -a -f $TARGET.hpp ]
+then 
+    [ -n "$QUIET" ] || echo \"$FILENAME.\*pp\" created
+else
+  echo `basename $0`: failed to create \"$FILENAME.cpp\". 1>&2
+  exit 1
+fi
+
+[ -n "$QUIET" ] || (echo "DONE"; echo; echo)
+

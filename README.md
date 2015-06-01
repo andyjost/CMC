@@ -1,2 +1,2 @@
 # CMC
-Curry Metacompiler
+Curry Midnight Compiler
