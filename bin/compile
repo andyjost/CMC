@@ -16,13 +16,13 @@ do
 done
 
 
-./translator/bin/curry2icur $QUIET $1
+$BASE/translator/bin/curry2icur $QUIET $1
 [ 0 -eq $? ] || exit $?
 # fix the -nt problem ???
 sleep 1
-./translator/bin/icur2cpp $QUIET $1
+$BASE/translator/bin/icur2cpp $QUIET $1
 [ 0 -eq $? ] || exit $?
-./translator/bin/cpp2exe $QUIET $EXEC $1
+$BASE/translator/bin/cpp2exe $QUIET $EXEC $1
 [ 0 -eq $? ] || exit $?
 
 # Do not execute here
