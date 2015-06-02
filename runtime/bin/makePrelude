@@ -1,0 +1,20 @@
+#!/bin/sh
+
+BASE=$(dirname $(dirname $(dirname $(readlink -f $0))))
+# echo $BASE
+
+cd $BASE/runtime/lib
+
+if [ -f Prelude.curry ]
+then
+    rm -rf .curry/Prelude.*
+    rm -rf Prelude.o Prelude.cpp Prelude.hpp
+    CURRYPATH=`pwd`
+    export CURRYPATH
+    $BASE/translator/bin/curry2cpp Prelude
+    mv .curry/Prelude.cpp .curry/Prelude.hpp .
+    rm -f .curry/Prelude.fcy .curry/Prelude.fint .curry/Prelude.icurry
+    scons
+else
+  echo File Prelude.curry is missing
+fi

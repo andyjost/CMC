@@ -23,6 +23,9 @@ then
   exit 1
 fi
 
+# ------------------------------------------------------------------
+# create ICurry
+
 parsecurry --flat $QUIET $FILE
 if [ $? -ne 0 ]
 then
@@ -30,23 +33,19 @@ then
   exit 1
 fi
 
-# ------------------------------------------------------------------
-# create ICurry
-
-CURRYPATH=$(dirname $1):$BASEDIR/icurry:$BASEDIR/poly:$PAKCSHOME/lib:$PAKCSHOME/lib/meta
+# Next path is required to compile Examples/RegExp.curry
+# CURRYPATH=$(dirname $1):$BASEDIR/icurry:$BASEDIR/poly
+# Next path is required to compile the Prelude
+CURRYPATH=$PAKCSHOME/lib:$PAKCSHOME/lib/meta:$BASEDIR/icurry:$BASEDIR/poly
 export CURRYPATH
 
-# ------------------------------------------------------------------
-# create ICurry
+TARGET=$(dirname $1)/.curry/$(basename $1 ".curry")
 
-TARGET=$(dirname $FILE)/.curry/$(basename $FILE ".curry")
+# echo TARGET $TARGET
 
 if [ -f $TARGET.icur -a $TARGET.icur -nt $FILE.curry ]
 then
-  if [ -z "$QUIET" ]
-  then
-    echo \"$FILE.icur\" up to date
-  fi
+    [ -n "$QUIET" ] || echo \"read\" up to date
 else
     rm -f $FILE.icur 
     command="pakcs $QUIET :set args $FILE :load $BASEDIR/icurry/Main.curry :eval Main.main :quit"
