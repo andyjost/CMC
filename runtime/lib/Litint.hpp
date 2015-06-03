@@ -4,6 +4,7 @@
 #include <iostream>
 #include <sstream>
 #include "Engine.hpp"
+#include "Macros.hpp"
 #include "Prelude.hpp"
 
 namespace _Prelude {

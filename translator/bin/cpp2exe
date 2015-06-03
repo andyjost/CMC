@@ -63,7 +63,7 @@ fi
 # Compile
 
 COMPILE="g++ -I $BASE/engine -I $BASE/lib -c -o $TARGET.o  $TARGET.cpp -g -O0"
-[ -n "$QUIET" ] || echo `basename $0`: executing $COMPILE
+[ -n "$QUIET" ] || echo `basename $0`: executing $COMPILE in directory `pwd`
 $COMPILE
 
 ISMAIN=`egrep "^M$" $TARGET.make`
@@ -75,7 +75,6 @@ then
   $LINK
   [ -z "$EXEC" ] || timeout 1 $FILE | head -200
 else
-  if [ -z "$EXEC" ]; then echo -z; fi
   [ -z "$EXEC" ] || echo `basename $0`: No main, no linking, no execution
 fi
 

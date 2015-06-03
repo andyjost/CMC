@@ -9,12 +9,11 @@ if [ -f Prelude.curry ]
 then
     rm -rf .curry/Prelude.*
     rm -rf Prelude.o Prelude.cpp Prelude.hpp
-    CURRYPATH=`pwd`
-    export CURRYPATH
-    $BASE/bin/compile Prelude
+    $BASE/translator/bin/curry2icur Prelude
+    $BASE/translator/bin/icur2cpp Prelude
     mv .curry/Prelude.cpp .curry/Prelude.hpp .
+    g++ -I $BASE/runtime/engine -I $BASE/runtime/lib -c -o Prelude.o  Prelude.cpp -g -O0
     rm -f .curry/Prelude.fcy .curry/Prelude.fint .curry/Prelude.icurry
-    scons
 else
   echo File Prelude.curry is missing
 fi
